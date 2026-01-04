@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Turing Machine – Animated Tape</title>
+<style>
+  body { font-family: Arial; text-align: center; }
+  .tape { display: flex; justify-content: center; margin: 20px; }
+  .cell {
+    width: 40px; height: 40px;
+    border: 1px solid black;
+    line-height: 40px;
+    margin: 2px;
+    font-size: 20px;
+  }
+  .head { background: lightblue; }
+</style>
+</head>
+<body>
+
+<h2>aⁿbⁿ Turing Machine – Animated Tape</h2>
+
+<input id="input" value="aabb">
+<br><br>
+
+<button onclick="step()">Step</button>
+<button onclick="run()">Run</button>
+<button onclick="reset()">Reset</button>
+
+<p id="state"></p>
+<div class="tape" id="tape"></div>
+
+<script>
+let tape = [];
+let head = 0;
+let state = "q0";
+let halted = false;
+
+function reset(){
+  tape = document.getElementById("input").value.split("");
+  tape.push("_");
+  head = 0;
+  state = "q0";
+  halted = false;
+  draw();
+}
+
+function transition(){
+  let sym = tape[head] || "_";
+
+  if(state==="q0" && sym==="a"){ tape[head]="X"; state="q1"; head++; }
+  else if(state==="q0" && sym==="Y"){ head++; }
+  else if(state==="q0" && sym==="_"){ state="q_accept"; halted=true; }
+
+  else if(state==="q1" && sym==="a"){ head++; }
+  else if(state==="q1" && sym==="Y"){ head++; }
+  else if(state==="q1" && sym==="b"){ tape[head]="Y"; state="q2"; head--; }
+
+  else if(state==="q2" && sym==="a"){ head--; }
+  else if(state==="q2" && sym==="Y"){ head--; }
+  else if(state==="q2" && sym==="X"){ state="q0"; head++; }
+
+  else { halted=true; }
+}
+
+function step(){
+  if(!halted){
+    transition();
+    draw();
+  }
+}
+
+function run(){
+  if(!halted){
+    step();
+    setTimeout(run,500);
+  }
+}
+
+function draw(){
+  const t = document.getElementById("tape");
+  t.innerHTML = "";
+  for(let i=0;i<tape.length;i++){
+    const d=document.createElement("div");
+    d.className="cell"+(i===head?" head":"");
+    d.innerText=tape[i];
+    t.appendChild(d);
+  }
+  document.getElementById("state").innerText =
+    halted ? "HALTED ("+state+")" : "State: "+state;
+}
+
+reset();
+</script>
+
+</body>
+</html>
